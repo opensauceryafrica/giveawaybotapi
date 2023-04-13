@@ -4,6 +4,8 @@ type Home struct {
 	Status      bool   `json:"status"`
 	Version     string `json:"version"`
 	Description string `json:"description"`
+	Name        string `json:"name"`
+	Twitter     string `json:"twitter"`
 }
 
 type Health struct {
@@ -17,5 +19,3 @@ type Response struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
-
-type M map[string]interface{}

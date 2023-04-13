@@ -14,12 +14,9 @@ import (
 func ParamsH() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 			//set path parameter to the request context
-			ctx := context.WithValue(r.Context(), typing.ParamsCtxKey{}, mux.Vars(r))
-
 			//call next handler
-			next.ServeHTTP(w, r.WithContext(ctx))
+			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), typing.ParamsCtxKey{}, mux.Vars(r))))
 
 		})
 	}
@@ -31,12 +28,9 @@ func ParamsH() func(http.Handler) http.Handler {
 func ParamsF() func(func(http.ResponseWriter, *http.Request)) http.Handler {
 	return func(next func(http.ResponseWriter, *http.Request)) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 			//set path parameter to the request context
-			ctx := context.WithValue(r.Context(), typing.ParamsCtxKey{}, mux.Vars(r))
-
 			//call next handler
-			next(w, r.WithContext(ctx))
+			next(w, r.WithContext(context.WithValue(r.Context(), typing.ParamsCtxKey{}, mux.Vars(r))))
 
 		})
 	}

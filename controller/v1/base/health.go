@@ -11,7 +11,7 @@ import (
 func Health(w http.ResponseWriter, r *http.Request) {
 
 	data := typing.Health{
-		Name:    "Golang Server Template",
+		Name:    "Giveaway Bot",
 		Status:  true,
 		Version: "1.0.0",
 	}
