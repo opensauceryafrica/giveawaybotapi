@@ -23,8 +23,8 @@ func TwitterAuth() string {
 	)
 }
 
-// TwitterRegister registers a new user with twitter
-func TwitterRegister(code string) (*user.User, error) {
+// TwitterSignon registers a new user with twitter
+func TwitterSignon(code string) (*user.User, error) {
 
 	// send http request to twitter to get access token
 	b, err := service.GetTwitterAccessToken(code)
@@ -87,7 +87,8 @@ func TwitterRegister(code string) (*user.User, error) {
 
 	// if twitter user exists, return error
 	if user.ID.String() != primitive.NilObjectID.String() {
-		return nil, fmt.Errorf("%s account already registered with Giveaway Bot. Please login", "Twitter")
+		// if user exists, prompt to login
+		return TwitterLogin(user.Twitter.ID, authResponse)
 	}
 
 	// if user doesn't exist, create user
@@ -103,51 +104,12 @@ func TwitterRegister(code string) (*user.User, error) {
 }
 
 // TwitterLogin logs in a user with twitter
-func TwitterLogin(code string) (*user.User, error) {
-
-	// send http request to twitter to get access token
-	b, err := service.GetTwitterAccessToken(code)
-	if err != nil {
-		return nil, errors.New(config.ErrTwitterUnauthorized)
-	}
-
-	// parse response
-	var authResponse typing.TwitterAuthResponse
-
-	if err := json.Unmarshal(b, &authResponse); err != nil {
-		return nil, errors.New(config.ErrTwitterUnauthorized)
-	}
-
-	// if no access token, return error
-	if authResponse.AccessToken == "" {
-		var twitterError typing.TwitterAuthError
-
-		if err := json.Unmarshal(b, &twitterError); err != nil {
-			return nil, errors.New(config.ErrTwitterUnauthorized)
-		}
-
-		return nil, errors.New(config.ErrTwitterUnauthorized)
-	}
-
-	// get the twitter user
-	b, err = service.GetAuthenticatedTwitterUser(authResponse.AccessToken)
-	if err != nil {
-		return nil, errors.New(config.ErrTwitterUnauthorized)
-	}
-
-	// parse response
-	var twitterUser typing.TwitterUserResponse
-
-	if err := json.Unmarshal(b, &twitterUser); err != nil {
-		return nil, errors.New(config.ErrTwitterUnauthorized)
-	}
+func TwitterLogin(id string, authResponse typing.TwitterAuthResponse) (*user.User, error) {
 
 	// build user
 	user := user.User{
-		Username: twitterUser.Data.Username,
 		Twitter: typing.TwitterUser{
-			ID:       twitterUser.Data.ID,
-			Username: twitterUser.Data.Username,
+			ID: id,
 		},
 	}
 

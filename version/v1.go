@@ -3,7 +3,7 @@ package version
 import (
 	mux "github.com/gorilla/mux"
 	"github.com/opensaucerers/giveawaybot/route"
-	"github.com/opensaucerers/giveawaybot/route/v1/base"
+	v1 "github.com/opensaucerers/giveawaybot/version/v1"
 )
 
 // Version1Routes registers all routes for the v1 version
@@ -14,6 +14,7 @@ func Version1Routes(r *mux.Router) {
 
 	// V1 routes
 	router := r.PathPrefix("/v1").Subrouter()
-	base.RegisterHealthRoutes(router)
+	v1.RegisterBaseRoutes(router)
+	v1.RegisterAuthRoutes(router)
 
 }

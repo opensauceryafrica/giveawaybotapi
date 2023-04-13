@@ -1,4 +1,4 @@
-package user
+package auth
 
 import (
 	"context"
@@ -16,13 +16,17 @@ func TwitterAuth(w http.ResponseWriter, r *http.Request) {
 	helper.SendJSONResponse(w, true, http.StatusOK, "Twitter auth url", typing.M{"url": url})
 }
 
-// TwitterRegister is a controller for intercepting twitter auth redirect and creating a new user
-func TwitterRegister(w http.ResponseWriter, r *http.Request) {
+// TwitterSignon is a controller for intercepting twitter auth redirect and creating a new user
+func TwitterSignon(w http.ResponseWriter, r *http.Request) {
 	// TODO: add validation for query params
 	// get code and address from query params
 	code := r.URL.Query().Get("code")
+	if code == "" {
+		helper.SendJSONResponse(w, false, http.StatusBadRequest, "Twitter code is required", nil)
+		return
+	}
 
-	user, err := auth.TwitterRegister(code)
+	user, err := auth.TwitterSignon(code)
 	if err != nil {
 		if err.Error() == config.ErrTwitterUnauthorized {
 			helper.SendJSONResponse(w, false, http.StatusUnauthorized, err.Error(), nil)
@@ -39,36 +43,5 @@ func TwitterRegister(w http.ResponseWriter, r *http.Request) {
 	r = r.WithContext(ctx)
 
 	// send response
-	helper.SendJSONResponse(w, true, http.StatusOK, "Registration successful", typing.M{"user": user}, true, r)
-}
-
-// TwitterLogin is a controller for intercepting twitter auth redirect and logging in an existing user
-func TwitterLogin(w http.ResponseWriter, r *http.Request) {
-	// TODO: add validation for query params
-	// get code and address from query params
-	code := r.URL.Query().Get("code")
-	address := r.URL.Query().Get("address")
-	if code == "" || address == "" {
-		helper.SendJSONResponse(w, false, http.StatusBadRequest, "Twitter code and wallet address are required", nil)
-		return
-	}
-
-	user, err := auth.TwitterLogin(code)
-	if err != nil {
-		if err.Error() == config.ErrTwitterUnauthorized {
-			helper.SendJSONResponse(w, false, http.StatusUnauthorized, err.Error(), nil)
-			return
-		}
-		helper.SendJSONResponse(w, false, http.StatusBadRequest, err.Error(), nil)
-		return
-	}
-
-	// add user to context
-	ctx := context.WithValue(r.Context(), typing.AuthCtxKey{}, user)
-
-	// load request with context
-	r = r.WithContext(ctx)
-
-	// send response
-	helper.SendJSONResponse(w, true, http.StatusOK, "Login successful", typing.M{"user": user}, true, r)
+	helper.SendJSONResponse(w, true, http.StatusOK, "Signon successful", typing.M{"user": user}, true, r)
 }
