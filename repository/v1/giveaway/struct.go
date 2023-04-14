@@ -33,4 +33,5 @@ type Report struct {
 	DuplicateReplies  map[string]string `json:"duplicate_replies"`
 	TotalValidReplies int               `json:"total_valid_replies"`
 	ValidReplies      map[string]string `json:"valid_replies"`
+	ValidRepliesList  []string          `json:"valid_replies_list"`
 }

@@ -95,6 +95,7 @@ func Report(id string) (*giveaway.Report, error) {
 		TotalReplies:     ga.TotalReplies,
 		DuplicateReplies: make(map[string]string),
 		ValidReplies:     make(map[string]string),
+		ValidRepliesList: make([]string, 0),
 	}
 
 	// find duplicate replies
@@ -127,7 +128,8 @@ func Report(id string) (*giveaway.Report, error) {
 	// we can generate report for non duplicate replies
 	for key, reply := range responses {
 		report.TotalValidReplies++
-		report.ValidReplies[strings.Split(key, "g1v3@w@60+")[1]] = fmt.Sprintf(`Tweeted the username '%s' once.  Tweet at https://twitter.com/%s/status/%s`, strings.Split(key, "g1v3@w@60+")[1], strings.Split(key, "g1v3@w@60+")[1], reply)
+		report.ValidReplies[strings.Split(key, "g1v3@w@60+")[1]] = fmt.Sprintf(`Tweeted the username '%s' once.  Tweet at https://twitter.com/%s/status/%s`, strings.Split(key, "g1v3@w@60+")[0], strings.Split(key, "g1v3@w@60+")[1], reply)
+		report.ValidRepliesList = append(report.ValidRepliesList, strings.Split(key, "g1v3@w@60+")[0])
 	}
 
 	return &report, nil
