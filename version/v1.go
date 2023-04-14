@@ -16,5 +16,6 @@ func Version1Routes(r *mux.Router) {
 	router := r.PathPrefix("/v1").Subrouter()
 	v1.RegisterBaseRoutes(router)
 	v1.RegisterAuthRoutes(router)
+	v1.RegisterGiveawayRoutes(router)
 
 }

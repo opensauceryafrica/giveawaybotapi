@@ -3,10 +3,12 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"reflect"
 	"strings"
 
 	"github.com/opensaucerers/giveawaybot/config"
+
 	"github.com/opensaucerers/giveawaybot/typing"
 	"github.com/samperfect/goaxios"
 )
@@ -84,13 +86,16 @@ func RefreshTwitterAccessToken(refreshToken string) ([]byte, error) {
 }
 
 // Tweet tweets a message to twitter
-func Tweet(accessToken, message, replyTo string) ([]byte, error) {
+func Tweet(accessToken, message, replyTo, quote string) ([]byte, error) {
 
 	body := map[string]interface{}{"text": message}
 	if replyTo != "" {
 		body["reply"] = map[string]interface{}{
 			"in_reply_to_tweet_id": replyTo,
 		}
+	}
+	if quote != "" {
+		body["quote_tweet_id"] = quote
 	}
 
 	// tweet the message
@@ -490,4 +495,200 @@ func GetTweetEmbed(username, tweetID string) ([]byte, error) {
 	}
 
 	return b, nil
+}
+
+// DeleteTweet deletes a tweet
+func DeleteTweet(accessToken, tweetID string) (bool, error) {
+	// delete tweet
+	r := goaxios.GoAxios{
+		Url:         "https://api.twitter.com/2/tweets/" + tweetID,
+		BearerToken: accessToken,
+		Method:      "DELETE",
+	}
+
+	// send request
+	_, b, _, err := r.RunRest()
+	if err != nil {
+		return false, err
+	}
+
+	// parse response
+	var response typing.TwitterDeleteTweetResponse
+
+	if err := json.Unmarshal(b, &response); err != nil {
+		return false, err
+	}
+
+	if !response.Data.Deteted {
+		var response typing.TwitterTweetError
+		if err := json.Unmarshal(b, &response); err != nil {
+			return true, err
+		}
+
+		if len(response.Errors) > 0 {
+
+			if strings.EqualFold(response.Errors[0].Title, config.ErrTwitterNotFound) {
+				return true, nil
+			}
+
+			if response.Errors[0].Title != "" {
+				return true, errors.New(response.Errors[0].Title)
+			}
+
+			return true, errors.New("unknown error")
+		} else if response.Title != "" {
+			return true, errors.New(response.Title)
+		}
+	}
+
+	return true, nil
+}
+
+// Mentions gets all mentions to a user
+func Mentions(accessToken, userID, limit, cursor string) ([]byte, error) {
+	// list replies
+	query := map[string]interface{}{
+		"tweet.fields": "conversation_id,referenced_tweets",
+		"expansions":   "author_id",
+		"user.fields":  "username",
+	}
+	if limit != "" {
+		query["max_results"] = limit
+	}
+	if cursor != "" {
+		query["pagination_token"] = cursor
+	}
+	r := goaxios.GoAxios{
+		Url:         "https://api.twitter.com/2/users/" + userID + "/mentions",
+		BearerToken: accessToken,
+		Query:       query,
+		Method:      "GET",
+	}
+
+	// send request
+	_, b, _, err := r.RunRest()
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
+
+var (
+	replies = make([]typing.Reply, 0)
+)
+
+// RetriveReplies gets all replies to a tweet
+func RetriveReplies(accessToken, userID, tweetID string) ([]typing.Reply, error) {
+
+	cursor := ""
+	limit := "100"
+
+	var err error
+	var b []byte
+
+	i := 0
+
+	for {
+
+		log.Printf("In 5 seconds getting page %d with cursor %s", i, cursor)
+
+		// time.Sleep(5 * time.Second)
+
+		// list likes
+		b, err = Mentions(accessToken, userID, limit, cursor)
+		if err != nil {
+			return replies, err
+		}
+
+		i++
+
+		// parse response
+		var response typing.TwitterListResponse
+
+		if err := json.Unmarshal(b, &response); err != nil {
+			return replies, err
+		}
+
+		var null *int = nil
+		var zero *int = new(int)
+		if !reflect.DeepEqual(response.Meta.ResultCount, null) && reflect.DeepEqual(response.Meta.ResultCount, zero) {
+			return replies, nil
+		}
+
+		if len(response.Data) == 0 {
+			var response typing.TwitterTweetError
+			if err := json.Unmarshal(b, &response); err != nil {
+				break
+			}
+
+			if len(response.Errors) > 0 {
+
+				if response.Errors[0].Title == config.ErrTwitterNotFound {
+					break
+				}
+
+				if response.Errors[0].Title != "" {
+					err = errors.New(response.Errors[0].Title)
+					break
+				}
+			} else if response.Title != "" {
+				err = errors.New(response.Title)
+				break
+			}
+
+			break
+		}
+
+		log.Printf("Found %d replies on page %d", len(response.Data), i)
+
+		for _, tweet := range response.Data {
+
+			if tweet.ConversationID == tweetID {
+
+				username := ""
+			Username:
+				for _, user := range response.Includes.Users {
+					if user.ID == tweet.AuthorID {
+						username = user.Username
+						break Username
+					}
+				}
+
+				// each tweet text is expected to contain @username. Ideally, each should contain just two @s, the first one being the username of the person being replied to and the second one being the username the person replying tagged. However, there are cases where the tweet text contains more than two @s. To efficiently handle this, we get the last @ in the tweet text and use that to get the username the person replying tagged.
+
+				at := strings.LastIndex(tweet.Text, "@")
+				if at == -1 {
+					continue
+				}
+
+				// get the username
+				ftext := tweet.Text[at:]
+
+				replies = append(replies, typing.Reply{
+					ID:       tweet.AuthorID,
+					Text:     tweet.Text,
+					Username: username,
+					TweetID:  tweet.ID,
+					FText:    ftext,
+				})
+			}
+		}
+
+		if response.Meta.NextToken != "" {
+			cursor = response.Meta.NextToken
+		} else {
+			cursor = ""
+		}
+
+		if cursor == "" {
+			log.Println("Stopping iteration...no more data")
+			break
+		}
+
+		log.Printf("Next cursor: %s", cursor)
+
+	}
+
+	return replies, err
 }

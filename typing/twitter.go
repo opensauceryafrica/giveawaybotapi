@@ -1,6 +1,8 @@
 package typing
 
-import "time"
+import (
+	"time"
+)
 
 type TwitterAuthResponse struct {
 	AccessToken  string `json:"access_token"`
@@ -52,10 +54,12 @@ type TwitterTweetError struct {
 		Title     string `json:"title"`
 		Detail    string `json:"detail"`
 		Parameter string `json:"parameter"`
+		Message   string `json:"message"`
 		Type      string `json:"type"`
 	} `json:"errors"`
 	Title     string `json:"title"`
 	Detail    string `json:"detail"`
+	Message   string `json:"message"`
 	Parameter string `json:"parameter"`
 	Type      string `json:"type"`
 }
@@ -80,6 +84,12 @@ type TwitterLikeTweetResponse struct {
 	} `json:"data"`
 }
 
+type TwitterDeleteTweetResponse struct {
+	Data struct {
+		Deteted bool `json:"deleted"`
+	} `json:"data"`
+}
+
 type TwitterRetweetResponse struct {
 	Data struct {
 		Retweeted bool `json:"retweeted"`
@@ -88,19 +98,35 @@ type TwitterRetweetResponse struct {
 
 type TwitterListResponse struct {
 	Data []struct {
-		ID       string `json:"id"`
-		Name     string `json:"name"`
-		Username string `json:"username"`
-		AuthorID string `json:"author_id"`
-		Text     string `json:"text"`
+		ID             string `json:"id"`
+		Name           string `json:"name"`
+		Username       string `json:"username"`
+		AuthorID       string `json:"author_id"`
+		Text           string `json:"text"`
+		ConversationID string `json:"conversation_id"`
 	}
 	Meta struct {
 		ResultCount *int   `json:"result_count"`
 		NextToken   string `json:"next_token"`
 	}
+	Includes struct {
+		Users []struct {
+			ID       string `json:"id"`
+			Name     string `json:"name"`
+			Username string `json:"username"`
+		} `json:"users"`
+	} `json:"includes"`
 }
 
 type TwitterEmbedResponse struct {
 	HTML string `json:"html"`
 	URL  string `json:"url"`
+}
+
+type Reply struct {
+	ID       string `json:"id" bson:"id"` // twitter id
+	Text     string `json:"text" bson:"text"`
+	Username string `json:"username" bson:"username"`
+	TweetID  string `json:"tweet_id" bson:"tweet_id"`
+	FText    string `json:"f_text" bson:"f_text"`
 }

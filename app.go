@@ -40,7 +40,7 @@ func createServer() (s *http.Server) {
 	version.Version1Routes(r.StrictSlash(true))
 
 	// load .env file
-	env := config.MustGet("ENV_PATH", ".env")
+	env := config.MustGet("ENV_PATH", ".env") // might be wondering, get ENV_PATH when env is not loaded yet? the answer is that you can set env variables out of the .env file (e.g. in the terminal using export ENV_PATH=...)
 	log.Printf("Loading %s file\n", env)
 	if err := godotenv.Load(env); err != nil {
 		if err := godotenv.Load(); err != nil {

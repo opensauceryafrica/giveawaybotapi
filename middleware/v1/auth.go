@@ -16,25 +16,38 @@ func Auth(w http.ResponseWriter, r *http.Request) context.Context {
 
 	// get auth header
 	authHeader := r.Header.Get("Authorization")
-	// validate auth header
+	useBearer := true
+	token := ""
+
+	// TODO: remove this but keep for now since we have to UI and we're
+	// defualting all calls to GET method
 	if authHeader == "" {
-		helper.SendJSONResponse(w, false, http.StatusUnauthorized, "User not logged in", nil)
-		return nil
+		token = r.URL.Query().Get("token")
+		useBearer = false
 	}
-	// split auth header
-	authHeaderSplit := strings.Split(authHeader, " ")
-	// validate auth header split
-	if len(authHeaderSplit) != 2 {
-		helper.SendJSONResponse(w, false, http.StatusUnauthorized, "User session not invalid", nil)
-		return nil
+
+	if useBearer {
+		// validate auth header
+		if authHeader == "" {
+			helper.SendJSONResponse(w, false, http.StatusUnauthorized, "User not logged in", nil)
+			return nil
+		}
+		// split auth header
+		authHeaderSplit := strings.Split(authHeader, " ")
+		// validate auth header split
+		if len(authHeaderSplit) != 2 {
+			helper.SendJSONResponse(w, false, http.StatusUnauthorized, "User session not invalid", nil)
+			return nil
+		}
+		// validate auth header split
+		if authHeaderSplit[0] != "Bearer" {
+			helper.SendJSONResponse(w, false, http.StatusUnauthorized, "User session not valid", nil)
+			return nil
+		}
+		// get token from auth header
+		token = authHeaderSplit[1]
 	}
-	// validate auth header split
-	if authHeaderSplit[0] != "Bearer" {
-		helper.SendJSONResponse(w, false, http.StatusUnauthorized, "User session not valid", nil)
-		return nil
-	}
-	// get token from auth header
-	token := authHeaderSplit[1]
+
 	// validate token
 	if token == "" {
 		helper.SendJSONResponse(w, false, http.StatusUnauthorized, "User not logged in", nil)
