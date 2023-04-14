@@ -12,23 +12,27 @@ After completing the twitter sign in step, a JSON containing your details and JW
 
 ## Endpoints
 
-- `GET / - Returns a 200 OK response if the bot is running`
+- `GET /` - Returns a 200 OK response if the bot is running`
 
-- `GET /v1/health - Returns a 200 OK response if the bot is running. This can include additional information about the bot's health`
+- `GET /v1/health` - Returns a 200 OK response if the bot is running. This can include additional information about the bot's health
 
-- `GET /v1/auth/twitter/begin - Returns a URL to redirect the user to in order to authenticate with Twitter`
+- `GET /v1/auth/twitter/begin` - Returns a URL to redirect the user to in order to authenticate with Twitter`
 
-- `GET /v1/auth/twitter/signon - This endpoint is to be called directly by Twitter (for now). This will register the user if not already registered or log them in if they are`
+- `GET /v1/auth/twitter/signon` - This endpoint is to be called directly by Twitter (for now). This will register the user if not already registered or log them in if they are
 
-- `GET /v1/giveaway/simulate/start?token= - Starts a new giveaway if one is not already running. This will also send a tweet to Twitter on behalf of the signed in user`
+- `GET /v1/giveaway/simulate/start?token=` - Starts a new giveaway if one is not already running. This will also send a tweet to Twitter on behalf of the signed in user
 
-- `GET /v1/giveaway/simulate/disrupt?token= - Disrupts the current giveaway if one is running. This will also delete the tweet on Twitter on behalf of the signed in user`
+- `GET /v1/giveaway/simulate/disrupt?token=` - Disrupts the current giveaway if one is running. This will also delete the tweet on Twitter on behalf of the signed in user
 
-- `GET /v1/giveaway/simulate/end?token= - Ends the current giveaway if one is running. It sets the completed status and the completed_at timestamp.`
+- `GET /v1/giveaway/simulate/end?token=` - Ends the current giveaway if one is running. It sets the completed status and the completed_at timestamp.
 
-- `GET /v1/giveaway/tweet/replies?token= - Makes a recursive call to Twitter to get all replies to the giveaway tweet. This is used to determine the winner of the giveaway.It also sets the giveaway status to inactive.`
+- `GET /v1/giveaway/tweet/replies?token=` - Makes a recursive call to Twitter to get all replies to the giveaway tweet. This is used to determine the winner of the giveaway.It also sets the giveaway status to inactive.
 
-- `GET /v1/giveaway/tweet/report/{id} - Compiles a report of the giveaway and returns it as a JSON object`
+- `GET /v1/giveaway/tweet/report/{id}` - Compiles a report of the giveaway and returns it as a JSON object
+
+- `GET /v1/giveaway/reward/start?token=` - Starts the reward process for the current giveaway. This will send a message to each of the winners on Twitter. This message will contain a link to a form where they can enter their details. This is used to send them their reward
+
+- `GET /v1/giveaway/reward/end?token=` - Ends the reward process for the current giveaway. This will prevent any more rewards from being sent out
 
 # Running
 

@@ -21,6 +21,7 @@ type Giveaway struct {
 	TweetID      string             `json:"tweet_id" bson:"tweet_id"`
 	TwitterURL   string             `json:"twitter_url" bson:"twitter_url"`
 	TwitterHTML  string             `json:"twitter_html" bson:"twitter_html"`
+	Rewarded     bool               `json:"rewarded" bson:"rewarded"`
 	AmountSpent  float64            `json:"amount_spent" bson:"amount_spent"`
 	CreatedAt    time.Time          `json:"created_at" bson:"created_at"`
 	UpdatedAt    time.Time          `json:"updated_at" bson:"updated_at"`

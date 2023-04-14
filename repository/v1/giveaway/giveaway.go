@@ -77,7 +77,19 @@ func (g *Giveaway) Complete() error {
 // for a user
 func IsRunning(owner user.User) (bool, error) {
 	// find active giveaways
-	if count, err := database.MongoDB.Collection(config.GiveawayCollection).CountDocuments(context.Background(), bson.M{"active": true, "completed": false, "author._id": owner.ID}); err != nil {
+	if count, err := database.MongoDB.Collection(config.GiveawayCollection).CountDocuments(context.Background(), bson.M{"$or": []bson.M{
+		{
+			"active":     true,
+			"completed":  false,
+			"author._id": owner.ID,
+		},
+		{
+			"active":     false,
+			"completed":  true,
+			"rewarded":   false,
+			"author._id": owner.ID,
+		},
+	}}); err != nil {
 		if err != mongo.ErrNoDocuments {
 			return false, nil // no active giveaways
 		}
@@ -91,7 +103,19 @@ func IsRunning(owner user.User) (bool, error) {
 func Running(owner user.User) (*Giveaway, error) {
 	// find active giveaways
 	giveaway := Giveaway{}
-	if err := database.MongoDB.Collection(config.GiveawayCollection).FindOne(context.Background(), bson.M{"active": true, "completed": false, "author._id": owner.ID}).Decode(&giveaway); err != nil {
+	if err := database.MongoDB.Collection(config.GiveawayCollection).FindOne(context.Background(), bson.M{"$or": []bson.M{
+		{
+			"active":     true,
+			"completed":  false,
+			"author._id": owner.ID,
+		},
+		{
+			"active":     false,
+			"completed":  true,
+			"rewarded":   false,
+			"author._id": owner.ID,
+		},
+	}}).Decode(&giveaway); err != nil {
 		if err != mongo.ErrNoDocuments {
 			return nil, err
 		}
