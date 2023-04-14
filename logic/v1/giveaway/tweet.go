@@ -59,7 +59,6 @@ func Replies(id string) (*giveaway.Giveaway, error) {
 
 	giveaway.Replies = replies
 	giveaway.TotalReplies = len(replies)
-	giveaway.Active = false
 
 	giveaway.Save()
 
@@ -87,7 +86,7 @@ func Report(id string) (*giveaway.Report, error) {
 	}
 
 	// if giveaway is not finished, return error
-	if ga.Active {
+	if !ga.Completed {
 		return nil, fmt.Errorf("unable to generate report for an active giveaway")
 	}
 
