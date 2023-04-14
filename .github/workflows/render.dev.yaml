@@ -1,0 +1,17 @@
+name: 'Deploy Docker Image to Render' # set whatever name you want for your github job
+on:
+  push: # set the events you would like to trigger this job
+    branches: [main]
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initiate Render Deployment
+        id: ird
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          method: 'GET'
+      - name: Log Initiate Deployment Response
+        run: echo ${{ steps.ird.outputs.response }}

@@ -14,8 +14,8 @@ WORKDIR /app
 COPY . .
 
 RUN go mod download
-RUN go build -o raid2earn .
+RUN go build -o giveawaybot .
 
 EXPOSE $PORT
 
-CMD [ "./raid2earn" ]
+CMD [ "./giveawaybot" ]
