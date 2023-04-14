@@ -574,20 +574,17 @@ func Mentions(accessToken, userID, limit, cursor string) ([]byte, error) {
 	return b, nil
 }
 
-var (
-	replies = make([]typing.Reply, 0)
-)
-
 // RetriveReplies gets all replies to a tweet
 func RetriveReplies(accessToken, userID, tweetID string) ([]typing.Reply, error) {
 
-	cursor := ""
-	limit := "100"
-
-	var err error
-	var b []byte
-
-	i := 0
+	var (
+		replies = make([]typing.Reply, 0)
+		cursor  = ""
+		limit   = "100"
+		err     error
+		b       []byte
+		i       = 0
+	)
 
 	for {
 
