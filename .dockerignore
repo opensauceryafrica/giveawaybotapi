@@ -1,0 +1,5 @@
+.env
+.env.example
+.gitignore
+readme.md
+Makefile
