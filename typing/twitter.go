@@ -12,7 +12,7 @@ type TwitterAuthResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-type TwitterUser struct {
+type Twitter struct {
 	ID           string    `json:"id" bson:"id"`
 	Username     string    `json:"username" bson:"username"`
 	AccessToken  string    `json:"access_token " bson:"access_token"`
@@ -22,7 +22,7 @@ type TwitterUser struct {
 	UpdatedAt    time.Time `json:"updated_at" bson:"updated_at"`
 }
 
-type TwitterUserResponse struct {
+type TwitterResponse struct {
 	Data struct {
 		ID            string `json:"id"`
 		Name          string `json:"name"`

@@ -17,7 +17,7 @@ func Replies(id string) (*giveaway.Giveaway, error) {
 
 	// build user
 	user := user.User{
-		Twitter: typing.TwitterUser{
+		Twitter: typing.Twitter{
 			ID: id,
 		},
 	}

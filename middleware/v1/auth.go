@@ -60,7 +60,7 @@ func Auth(w http.ResponseWriter, r *http.Request) context.Context {
 		return nil
 	}
 
-	user := user.User{Twitter: typing.TwitterUser{ID: claim.ID}}
+	user := user.User{Twitter: typing.Twitter{ID: claim.ID}}
 	// get user from token
 	if err := user.FindSocial(typing.Social{Twitter: true}); err != nil {
 		helper.SendJSONResponse(w, false, http.StatusUnauthorized, "Error getting user from token: "+err.Error(), nil)

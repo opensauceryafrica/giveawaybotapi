@@ -51,30 +51,30 @@ func TwitterSignon(code string) (*user.User, error) {
 	}
 
 	// get the twitter user
-	b, err = service.GetAuthenticatedTwitterUser(authResponse.AccessToken)
+	b, err = service.GetAuthenticatedTwitter(authResponse.AccessToken)
 	if err != nil {
 		return nil, errors.New(config.ErrTwitterUnauthorized)
 	}
 
 	// parse response
-	var twitterUser typing.TwitterUserResponse
+	var Twitter typing.TwitterResponse
 
-	if err := json.Unmarshal(b, &twitterUser); err != nil {
+	if err := json.Unmarshal(b, &Twitter); err != nil {
 		return nil, errors.New(config.ErrTwitterUnauthorized)
 	}
 
 	// build user
 	user := user.User{
-		Username:       twitterUser.Data.Username,
+		Username:       Twitter.Data.Username,
 		UseTwitterAuth: true,
-		Twitter: typing.TwitterUser{
+		Twitter: typing.Twitter{
 			AccessToken:  authResponse.AccessToken,
 			RefreshToken: authResponse.RefreshToken,
 			TokenType:    authResponse.TokenType,
 			RetrievedAt:  time.Now().UTC(),
 			UpdatedAt:    time.Now().UTC(),
-			ID:           twitterUser.Data.ID,
-			Username:     twitterUser.Data.Username,
+			ID:           Twitter.Data.ID,
+			Username:     Twitter.Data.Username,
 		},
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
@@ -108,7 +108,7 @@ func TwitterLogin(id string, authResponse typing.TwitterAuthResponse) (*user.Use
 
 	// build user
 	user := user.User{
-		Twitter: typing.TwitterUser{
+		Twitter: typing.Twitter{
 			ID: id,
 		},
 	}

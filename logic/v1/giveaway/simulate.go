@@ -18,7 +18,7 @@ func Start(id string) (*giveaway.Giveaway, error) {
 
 	/// build user
 	user := user.User{
-		Twitter: typing.TwitterUser{
+		Twitter: typing.Twitter{
 			ID: id,
 		},
 	}
@@ -96,7 +96,7 @@ func Disrupt(id string) (*giveaway.Giveaway, error) {
 
 	// build user
 	user := user.User{
-		Twitter: typing.TwitterUser{
+		Twitter: typing.Twitter{
 			ID: id,
 		},
 	}
@@ -149,7 +149,7 @@ func End(id string) (*giveaway.Giveaway, error) {
 
 	// build user
 	user := user.User{
-		Twitter: typing.TwitterUser{
+		Twitter: typing.Twitter{
 			ID: id,
 		},
 	}

@@ -41,7 +41,7 @@ func GetTwitterAccessToken(code string) ([]byte, error) {
 }
 
 // GetAuthenticatedUser gets the authenticated user from twitter
-func GetAuthenticatedTwitterUser(accessToken string) ([]byte, error) {
+func GetAuthenticatedTwitter(accessToken string) ([]byte, error) {
 	// get the twitter user
 	u := goaxios.GoAxios{
 		Url:         "https://api.twitter.com/2/users/me",
