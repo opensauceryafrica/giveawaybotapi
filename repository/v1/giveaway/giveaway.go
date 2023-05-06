@@ -73,6 +73,26 @@ func (g *Giveaway) Complete() error {
 	return nil
 }
 
+// Reward marks a giveaway as rewarded
+func (g *Giveaway) Reward() error {
+	// update giveaway
+	_, err := database.MongoDB.Collection(config.GiveawayCollection).UpdateOne(context.Background(), bson.M{"_id": g.ID}, bson.M{"$set": bson.M{"rewarded": true, "updated_at": time.Now().UTC()}})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Close closes a giveaway by marking as completed and rewarding
+func (g *Giveaway) Close() error {
+	// update giveaway
+	_, err := database.MongoDB.Collection(config.GiveawayCollection).UpdateOne(context.Background(), bson.M{"_id": g.ID}, bson.M{"$set": bson.M{"active": false, "completed": true, "completed_at": time.Now().UTC(), "rewarded": true, "updated_at": time.Now().UTC()}})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // IsRunning checks if there exists at least one active giveaway
 // for a user
 func IsRunning(owner user.User) (bool, error) {

@@ -12,6 +12,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/opensaucerers/giveawaybot/config"
+	"github.com/opensaucerers/giveawaybot/cron"
 	"github.com/opensaucerers/giveawaybot/database"
 
 	"github.com/opensaucerers/giveawaybot/middleware/v1"
@@ -76,8 +77,14 @@ func createServer() (s *http.Server) {
 	}
 
 	go func() {
+		go func() {
+			// start cron jobs
+			cron.S.StartBlocking()
+		}()
+
 		log.Printf("Starting at http://127.0.0.1%s", fmt.Sprintf(":%s", config.Env.Port))
 		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			cron.S.Stop()
 			log.Fatalf("error listening on port: %s\n", err)
 		}
 	}()
@@ -102,7 +109,9 @@ func main() {
 		cancel()
 	}()
 	if err := s.Shutdown(ctx); err != nil {
+		cron.S.Stop()
 		log.Fatal("Server forced to shut down...")
 	}
+	cron.S.Stop()
 	log.Println("Server exited!")
 }

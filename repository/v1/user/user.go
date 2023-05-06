@@ -105,3 +105,13 @@ func (u *User) RefreshTwitterAccessToken() error {
 	u.Save()
 	return nil
 }
+
+// FindByUsername finds user by username
+func (u *User) FindByUsername() error {
+	if err := database.MongoDB.Collection(config.UserCollection).FindOne(context.Background(), bson.M{"username": u.Username}).Decode(&u); err != nil {
+		if err != mongo.ErrNoDocuments {
+			return err
+		}
+	}
+	return nil
+}
