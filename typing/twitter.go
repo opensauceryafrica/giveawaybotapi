@@ -134,6 +134,7 @@ type Reply struct {
 	FText          string             `json:"f_text" bson:"f_text"`
 	Giveaway       primitive.ObjectID `json:"giveaway" bson:"giveaway"`
 	ConversationID string             `json:"conversation_id" bson:"conversation_id"`
+	Claimed        bool               `json:"claimed" bson:"claimed"`
 }
 
 type TwitterMessageResponse struct {

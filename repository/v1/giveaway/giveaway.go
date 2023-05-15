@@ -343,7 +343,7 @@ func (g *Giveaway) InboxForReward(user user.User) {
 			if strings.EqualFold(r.Username, winner) {
 				if r.ConversationID == "" {
 					// send direct message
-					b, err := service.Message(user.Twitter.AccessToken, r.ID, fmt.Sprintf(config.TwitterGiveawayMessage, "https://opensaucerersgiveaway.onrender.com/claim?token="+r.ID))
+					b, err := service.Message(user.Twitter.AccessToken, r.ID, fmt.Sprintf(config.TwitterGiveawayMessage, "https://opensaucerersgiveaway.onrender.com/claim?token="+r.ID+"_"+r.TweetID))
 					if err != nil {
 						return
 					}
