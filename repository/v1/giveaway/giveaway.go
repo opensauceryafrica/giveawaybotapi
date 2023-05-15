@@ -9,6 +9,7 @@ import (
 
 	"github.com/opensaucerers/giveawaybot/config"
 	"github.com/opensaucerers/giveawaybot/database"
+	"github.com/opensaucerers/giveawaybot/helper"
 	"github.com/opensaucerers/giveawaybot/repository/v1/user"
 	"github.com/opensaucerers/giveawaybot/service"
 	"github.com/opensaucerers/giveawaybot/typing"
@@ -342,8 +343,13 @@ func (g *Giveaway) InboxForReward(user user.User) {
 
 			if strings.EqualFold(r.Username, winner) {
 				if r.ConversationID == "" {
+					// sign jwt for claim
+					jwt, err := helper.SignJWT(r.TweetID, false)
+					if err != nil {
+						return
+					}
 					// send direct message
-					b, err := service.Message(user.Twitter.AccessToken, r.ID, fmt.Sprintf(config.TwitterGiveawayMessage, "https://opensaucerersgiveaway.onrender.com/claim?token="+r.ID+"_"+r.TweetID))
+					b, err := service.Message(user.Twitter.AccessToken, r.ID, fmt.Sprintf(config.TwitterGiveawayMessage, "https://opensaucerersgiveaway.onrender.com/claim?token="+jwt))
 					if err != nil {
 						return
 					}
