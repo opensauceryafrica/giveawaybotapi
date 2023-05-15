@@ -84,7 +84,7 @@ func createServer() (s *http.Server) {
 
 		log.Printf("Starting at http://127.0.0.1%s", fmt.Sprintf(":%s", config.Env.Port))
 		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			cron.S.Stop()
+			cron.S.StopBlockingChan()
 			log.Fatalf("error listening on port: %s\n", err)
 		}
 	}()
@@ -109,9 +109,9 @@ func main() {
 		cancel()
 	}()
 	if err := s.Shutdown(ctx); err != nil {
-		cron.S.Stop()
+		cron.S.StopBlockingChan()
 		log.Fatal("Server forced to shut down...")
 	}
-	cron.S.Stop()
+	cron.S.StopBlockingChan()
 	log.Println("Server exited!")
 }

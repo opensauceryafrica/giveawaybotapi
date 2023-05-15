@@ -179,6 +179,10 @@ func End(id string) (*giveaway.Giveaway, error) {
 		return nil, fmt.Errorf("no active giveaway found")
 	}
 
+	if err := giveaway.Replyies(); err != nil {
+		return nil, err
+	}
+
 	// don't end if replies are empty
 	if len(giveaway.Replies) == 0 {
 		return nil, fmt.Errorf("you need to trigger the bot to retrieve all replies before ending the giveaway")

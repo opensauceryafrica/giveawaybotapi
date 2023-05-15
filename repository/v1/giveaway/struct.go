@@ -15,6 +15,7 @@ type Giveaway struct {
 	Author       user.User          `json:"author"`
 	Active       bool               `json:"active" bson:"active"`
 	Replies      []typing.Reply     `json:"replies" bson:"replies"`
+	Winners      []string           `json:"winners" bson:"winners"`
 	TotalReplies int                `json:"total_replies" bson:"total_replies"`
 	Completed    bool               `json:"completed" bson:"completed"`
 	Tweet        string             `json:"tweet" bson:"tweet"`
@@ -22,6 +23,8 @@ type Giveaway struct {
 	TwitterURL   string             `json:"twitter_url" bson:"twitter_url"`
 	TwitterHTML  string             `json:"twitter_html" bson:"twitter_html"`
 	Rewarded     bool               `json:"rewarded" bson:"rewarded"`
+	ReportTweet  string             `json:"report_tweet" bson:"report_tweet"`
+	WinnersTweet []string           `json:"winners_tweet" bson:"winners_tweet"`
 	AmountSpent  float64            `json:"amount_spent" bson:"amount_spent"`
 	CreatedAt    time.Time          `json:"created_at" bson:"created_at"`
 	UpdatedAt    time.Time          `json:"updated_at" bson:"updated_at"`
@@ -36,3 +39,5 @@ type Report struct {
 	ValidReplies      map[string]string `json:"valid_replies"`
 	ValidRepliesList  []string          `json:"valid_replies_list"`
 }
+
+type Replies []typing.Reply

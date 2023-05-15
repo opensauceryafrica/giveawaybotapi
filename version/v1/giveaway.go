@@ -11,4 +11,5 @@ func RegisterGiveawayRoutes(r *mux.Router) {
 
 	giveaway.RegisterSimulateRoutes(router)
 	giveaway.RegisterTweetRoutes(router)
+	giveaway.RegisterRewardRoutes(router)
 }

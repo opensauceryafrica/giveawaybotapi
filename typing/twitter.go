@@ -2,6 +2,8 @@ package typing
 
 import (
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TwitterAuthResponse struct {
@@ -124,9 +126,19 @@ type TwitterEmbedResponse struct {
 }
 
 type Reply struct {
-	ID       string `json:"id" bson:"id"` // twitter id
-	Text     string `json:"text" bson:"text"`
-	Username string `json:"username" bson:"username"`
-	TweetID  string `json:"tweet_id" bson:"tweet_id"`
-	FText    string `json:"f_text" bson:"f_text"`
+	MID            primitive.ObjectID `json:"-" bson:"_id,omitempty"`
+	ID             string             `json:"id" bson:"id"` // twitter id
+	Text           string             `json:"text" bson:"text"`
+	Username       string             `json:"username" bson:"username"`
+	TweetID        string             `json:"tweet_id" bson:"tweet_id"`
+	FText          string             `json:"f_text" bson:"f_text"`
+	Giveaway       primitive.ObjectID `json:"giveaway" bson:"giveaway"`
+	ConversationID string             `json:"conversation_id" bson:"conversation_id"`
+}
+
+type TwitterMessageResponse struct {
+	Data struct {
+		DMConversationID string `json:"dm_conversation_id"`
+		DMEventID        string `json:"dm_event_id"`
+	} `json:"data"`
 }

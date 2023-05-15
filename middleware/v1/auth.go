@@ -12,7 +12,7 @@ import (
 )
 
 // Auth is checking if the user is logged in
-func Auth(w http.ResponseWriter, r *http.Request) context.Context {
+func auth(w http.ResponseWriter, r *http.Request) context.Context {
 
 	// get auth header
 	authHeader := r.Header.Get("Authorization")
@@ -82,7 +82,7 @@ func Auth(w http.ResponseWriter, r *http.Request) context.Context {
 func AuthH(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// get auth context
-		ctx := Auth(w, r)
+		ctx := auth(w, r)
 		if ctx == nil {
 			return
 		}
@@ -96,7 +96,7 @@ func AuthH(next http.Handler) http.Handler {
 func AuthF(next func(http.ResponseWriter, *http.Request)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// get auth context
-		ctx := Auth(w, r)
+		ctx := auth(w, r)
 		if ctx == nil {
 			return
 		}

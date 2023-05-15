@@ -47,18 +47,29 @@ func Replies(id string) (*giveaway.Giveaway, error) {
 		return nil, fmt.Errorf("no active giveaway found")
 	}
 
+	if err := giveaway.Replyies(); err != nil {
+		return nil, err
+	}
+
 	// if replies are already fetched, return
 	if len(giveaway.Replies) > 0 {
 		return giveaway, nil
 	}
 
-	replies, err := service.RetriveReplies(config.Env.TwitterBearerToken, user.Twitter.ID, giveaway.TweetID)
+	replies, err := service.RetriveReplies(config.Env.TwitterBearerToken, user.Twitter.ID, giveaway.TweetID, giveaway.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	giveaway.Replies = replies
 	giveaway.TotalReplies = len(replies)
+
+	// save replies
+	if err := giveaway.ReplyInBatch(); err != nil {
+		return nil, err
+	}
+
+	giveaway.Replies = nil
 
 	giveaway.Save()
 
@@ -96,6 +107,10 @@ func Report(id string) (*giveaway.Report, error) {
 		DuplicateReplies: make(map[string]string),
 		ValidReplies:     make(map[string]string),
 		ValidRepliesList: make([]string, 0),
+	}
+
+	if err := ga.Replyies(); err != nil {
+		return nil, err
 	}
 
 	// find duplicate replies

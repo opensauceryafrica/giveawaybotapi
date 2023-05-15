@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/opensaucerers/giveawaybot/config"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/opensaucerers/giveawaybot/typing"
 	"github.com/samperfect/goaxios"
@@ -575,7 +576,7 @@ func Mentions(accessToken, userID, limit, cursor string) ([]byte, error) {
 }
 
 // RetriveReplies gets all replies to a tweet
-func RetriveReplies(accessToken, userID, tweetID string) ([]typing.Reply, error) {
+func RetriveReplies(accessToken, userID, tweetID string, giveawayid primitive.ObjectID) ([]typing.Reply, error) {
 
 	var (
 		replies = make([]typing.Reply, 0)
@@ -668,6 +669,7 @@ func RetriveReplies(accessToken, userID, tweetID string) ([]typing.Reply, error)
 					Username: username,
 					TweetID:  tweet.ID,
 					FText:    ftext,
+					Giveaway: giveawayid,
 				})
 			}
 		}
@@ -688,4 +690,26 @@ func RetriveReplies(accessToken, userID, tweetID string) ([]typing.Reply, error)
 	}
 
 	return replies, err
+}
+
+// Message sends a message to a user
+func Message(accessToken, userID, text string) ([]byte, error) {
+
+	// send message
+	r := goaxios.GoAxios{
+		Url:         "https://api.twitter.com/2/dm_conversations/with/" + userID + "/messages",
+		BearerToken: accessToken,
+		Body: map[string]interface{}{
+			"text": text,
+		},
+		Method: "POST",
+	}
+
+	// send request
+	_, b, _, err := r.RunRest()
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }

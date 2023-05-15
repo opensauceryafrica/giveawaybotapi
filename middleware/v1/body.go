@@ -10,7 +10,7 @@ import (
 )
 
 // Body parses the request body into the given struct
-func Body(bodyStruct interface{}, w http.ResponseWriter, r *http.Request) context.Context {
+func body(bodyStruct interface{}, w http.ResponseWriter, r *http.Request) context.Context {
 	//parse body
 	err := json.NewDecoder(r.Body).Decode(bodyStruct)
 	if err != nil {
@@ -30,7 +30,7 @@ func BodyH(bodyStruct interface{}) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			//parse body
-			ctx := Body(bodyStruct, w, r)
+			ctx := body(bodyStruct, w, r)
 			if ctx == nil {
 				return
 			}
@@ -47,7 +47,7 @@ func BodyF(bodyStruct interface{}) func(func(http.ResponseWriter, *http.Request)
 	return func(next func(http.ResponseWriter, *http.Request)) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			//parse body
-			ctx := Body(bodyStruct, w, r)
+			ctx := body(bodyStruct, w, r)
 			if ctx == nil {
 				return
 			}
