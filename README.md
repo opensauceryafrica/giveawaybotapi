@@ -39,8 +39,8 @@ After completing the twitter sign in step, a JSON containing your details and JW
 First, clone the repo and install the dependencies:
 
 ```bash
-git clone https://github.com/opensaucerers/giveawaybot.git
-cd giveawaybot
+git clone https://github.com/opensaucerers/giveawaybotapi.git
+cd giveawaybotapi
 go mod tidy
 ```
 

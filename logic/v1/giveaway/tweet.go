@@ -10,6 +10,7 @@ import (
 	"github.com/opensaucerers/giveawaybot/repository/v1/user"
 	"github.com/opensaucerers/giveawaybot/service"
 	"github.com/opensaucerers/giveawaybot/typing"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -148,4 +149,22 @@ func Report(id string) (*giveaway.Report, error) {
 	}
 
 	return &report, nil
+}
+
+// Past retrieves past giveaways
+func Past(limit, offset int) (giveaway.Giveaways, error) {
+	// build giveaway
+	ga := giveaway.Giveaways{}
+
+	// get past giveaways
+	err := ga.FindGiveawaysByMatch(bson.M{
+		"active":    false,
+		"completed": true,
+		"rewarded":  true,
+	}, int64(limit), int64(offset))
+	if err != nil {
+		return nil, err
+	}
+
+	return ga, nil
 }

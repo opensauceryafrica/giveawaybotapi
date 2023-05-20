@@ -3,7 +3,9 @@ package giveaway
 import (
 	"context"
 	"net/http"
+	"strconv"
 
+	"github.com/opensaucerers/giveawaybot/config"
 	"github.com/opensaucerers/giveawaybot/helper"
 	"github.com/opensaucerers/giveawaybot/logic/v1/giveaway"
 	"github.com/opensaucerers/giveawaybot/repository/v1/user"
@@ -33,7 +35,7 @@ func Replies(w http.ResponseWriter, r *http.Request) {
 
 // Replies retrieves all replies to a giveaway
 func Report(w http.ResponseWriter, r *http.Request) {
-	// get user from context
+	// get giveaway id from context
 	id := r.Context().Value(typing.ParamsCtxKey{}).(map[string]string)["id"]
 	if id == "" {
 		helper.SendJSONResponse(w, false, http.StatusBadRequest, "Invalid giveaway ID", nil)
@@ -48,4 +50,35 @@ func Report(w http.ResponseWriter, r *http.Request) {
 
 	// send response
 	helper.SendJSONResponse(w, true, http.StatusOK, "Report generated", typing.M{"report": report})
+}
+
+// Past retrieves past giveaways
+func Past(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	var limit, offset int
+	limit = config.DefaultPageLimit
+	if r.URL.Query().Get("limit") != "" {
+		if limit, err = strconv.Atoi(r.URL.Query().Get("limit")); err != nil {
+			helper.SendJSONResponse(w, false, http.StatusBadRequest, err.Error(), nil)
+			return
+		}
+	}
+
+	if r.URL.Query().Get("offset") != "" {
+		if offset, err = strconv.Atoi(r.URL.Query().Get("offset")); err != nil {
+			helper.SendJSONResponse(w, false, http.StatusBadRequest, err.Error(), nil)
+			return
+		}
+	}
+
+	past, err := giveaway.Past(limit, offset)
+	if err != nil {
+		helper.SendJSONResponse(w, false, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	// send response
+	helper.SendJSONResponse(w, true, http.StatusOK, "Giveaways retrieved", typing.M{"past": past})
 }
