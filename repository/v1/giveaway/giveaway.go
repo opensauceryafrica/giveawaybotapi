@@ -217,7 +217,7 @@ func (g *Giveaways) FindGiveawaysByMatch(match bson.M, limit, offset int64) erro
 	if cursor, err := database.MongoDB.Collection(config.GiveawayCollection).Find(context.Background(), match, &options.FindOptions{
 		Limit: &limit,
 		Skip:  &offset,
-		Sort:  bson.M{"created_at": -1},
+		// Sort:  bson.M{"created_at": -1},
 	}); err != nil {
 		return err
 	} else {
@@ -233,7 +233,7 @@ func (r *Replies) FindRepliesByMatch(match bson.M, limit, offset int64) error {
 	if cursor, err := database.MongoDB.Collection(config.RepliesCollection).Find(context.Background(), match, &options.FindOptions{
 		Limit: &limit,
 		Skip:  &offset,
-		Sort:  bson.M{"created_at": -1},
+		// Sort:  bson.M{"created_at": -1},
 	}); err != nil {
 		return err
 	} else {

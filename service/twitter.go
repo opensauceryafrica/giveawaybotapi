@@ -10,8 +10,8 @@ import (
 	"github.com/opensaucerers/giveawaybot/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/opensaucerer/goaxios"
 	"github.com/opensaucerers/giveawaybot/typing"
-	"github.com/samperfect/goaxios"
 )
 
 // GetAccessToken gets the access token from twitter
@@ -23,7 +23,7 @@ func GetTwitterAccessToken(code string) ([]byte, error) {
 		Headers: map[string]string{
 			// needs to be empty to prevent goaxios from setting content-type to application/json
 		},
-		Query: map[string]interface{}{
+		Query: map[string]string{
 			"code":          code,
 			"grant_type":    "authorization_code",
 			"client_id":     config.Env.TwitterClientID,
@@ -33,12 +33,12 @@ func GetTwitterAccessToken(code string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // GetAuthenticatedUser gets the authenticated user from twitter
@@ -47,18 +47,18 @@ func GetAuthenticatedTwitter(accessToken string) ([]byte, error) {
 	u := goaxios.GoAxios{
 		Url:         "https://api.twitter.com/2/users/me",
 		BearerToken: accessToken,
-		Query: map[string]interface{}{
+		Query: map[string]string{
 			"user.fields": "public_metrics",
 		},
 	}
 
 	// send request
-	_, b, _, err := u.RunRest()
-	if err != nil {
-		return nil, err
+	resp := u.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // RefreshTwitterAccessToken refreshes the access token from twitter
@@ -70,7 +70,7 @@ func RefreshTwitterAccessToken(refreshToken string) ([]byte, error) {
 		Headers: map[string]string{
 			// needs to be empty to prevent goaxios from setting content-type to application/json
 		},
-		Query: map[string]interface{}{
+		Query: map[string]string{
 			"grant_type":    "refresh_token",
 			"refresh_token": refreshToken,
 			"client_id":     config.Env.TwitterClientID,
@@ -78,12 +78,12 @@ func RefreshTwitterAccessToken(refreshToken string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // Tweet tweets a message to twitter
@@ -108,18 +108,18 @@ func Tweet(accessToken, message, replyTo, quote string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // ListTweets lists tweets from twitter
 func ListTweets(accessToken, userID, limit, cursor string) ([]byte, error) {
 	// list tweets
-	query := map[string]interface{}{
+	query := map[string]string{
 		"tweet.fields": "created_at",
 	}
 	if limit != "" {
@@ -136,12 +136,12 @@ func ListTweets(accessToken, userID, limit, cursor string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // LikeTweet likes a tweet
@@ -157,12 +157,12 @@ func LikeTweet(accessToken, userID, tweetID string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // Retweet retweets a tweet
@@ -178,18 +178,18 @@ func Retweet(accessToken, userID, tweetID string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // ListLikes lists likes of a specific tweet
 func ListLikes(accessToken, tweetID, limit, cursor string) ([]byte, error) {
 	// list likes
-	query := map[string]interface{}{}
+	query := map[string]string{}
 	if limit != "" {
 		query["max_results"] = limit
 	}
@@ -204,12 +204,12 @@ func ListLikes(accessToken, tweetID, limit, cursor string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // IsLiking verifies if a user is liking a tweet
@@ -274,7 +274,7 @@ func IsLiking(accessToken, userID, tweetID, cursor string) (bool, error) {
 // ListRetweets lists retweets of a specific tweet
 func ListRetweets(accessToken, tweetID, limit, cursor string) ([]byte, error) {
 	// list likes
-	query := map[string]interface{}{}
+	query := map[string]string{}
 	if limit != "" {
 		query["max_results"] = limit
 	}
@@ -289,12 +289,12 @@ func ListRetweets(accessToken, tweetID, limit, cursor string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // IsRetweeting verifies if a user is retweeting a tweet
@@ -362,7 +362,7 @@ func GetTweet(accessToken, tweetID string) ([]byte, error) {
 	r := goaxios.GoAxios{
 		Url:         "https://api.twitter.com/2/tweets",
 		BearerToken: accessToken,
-		Query: map[string]interface{}{
+		Query: map[string]string{
 			"ids":        tweetID,
 			"expansions": "author_id",
 		},
@@ -370,12 +370,12 @@ func GetTweet(accessToken, tweetID string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // IsReplying verifies if a user is replying to a tweet
@@ -479,7 +479,7 @@ func GetTweetEmbed(username, tweetID string) ([]byte, error) {
 	// get embed
 	r := goaxios.GoAxios{
 		Url: "https://publish.twitter.com/oembed",
-		Query: map[string]interface{}{
+		Query: map[string]string{
 			"url":         "https://twitter.com/" + username + "/status/" + tweetID,
 			"hide_thread": "false",
 			"partner":     "",
@@ -490,12 +490,12 @@ func GetTweetEmbed(username, tweetID string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // DeleteTweet deletes a tweet
@@ -508,21 +508,21 @@ func DeleteTweet(accessToken, tweetID string) (bool, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return false, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return false, resp.Error
 	}
 
 	// parse response
 	var response typing.TwitterDeleteTweetResponse
 
-	if err := json.Unmarshal(b, &response); err != nil {
+	if err := json.Unmarshal(resp.Bytes, &response); err != nil {
 		return false, err
 	}
 
 	if !response.Data.Deteted {
 		var response typing.TwitterTweetError
-		if err := json.Unmarshal(b, &response); err != nil {
+		if err := json.Unmarshal(resp.Bytes, &response); err != nil {
 			return true, err
 		}
 
@@ -548,7 +548,7 @@ func DeleteTweet(accessToken, tweetID string) (bool, error) {
 // Mentions gets all mentions to a user
 func Mentions(accessToken, userID, limit, cursor string) ([]byte, error) {
 	// list replies
-	query := map[string]interface{}{
+	query := map[string]string{
 		"tweet.fields": "conversation_id,referenced_tweets",
 		"expansions":   "author_id",
 		"user.fields":  "username",
@@ -567,12 +567,13 @@ func Mentions(accessToken, userID, limit, cursor string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	// send request
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }
 
 // RetriveReplies gets all replies to a tweet
@@ -706,10 +707,10 @@ func Message(accessToken, userID, text string) ([]byte, error) {
 	}
 
 	// send request
-	_, b, _, err := r.RunRest()
-	if err != nil {
-		return nil, err
+	resp := r.RunRest()
+	if resp.Error != nil {
+		return nil, resp.Error
 	}
 
-	return b, nil
+	return resp.Bytes, nil
 }

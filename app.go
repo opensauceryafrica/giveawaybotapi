@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,13 +15,14 @@ import (
 	"github.com/opensaucerers/giveawaybot/config"
 	"github.com/opensaucerers/giveawaybot/cron"
 	"github.com/opensaucerers/giveawaybot/database"
+	"github.com/opensaucerers/giveawaybot/typing"
 
 	"github.com/opensaucerers/giveawaybot/middleware/v1"
-	"github.com/opensaucerers/giveawaybot/typing"
 	"github.com/opensaucerers/giveawaybot/version"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	ts "github.com/n0madic/twitter-scraper"
 )
 
 func createServer() (s *http.Server) {
@@ -39,23 +41,6 @@ func createServer() (s *http.Server) {
 
 	// register routes with versioning
 	version.Version1Routes(r.StrictSlash(true))
-
-	// load .env file
-	env := config.MustGet("ENV_PATH", ".env") // might be wondering, get ENV_PATH when env is not loaded yet? the answer is that you can set env variables out of the .env file (e.g. in the terminal using export ENV_PATH=...)
-	log.Printf("Loading %s file\n", env)
-	if err := godotenv.Load(env); err != nil {
-		if err := godotenv.Load(); err != nil {
-			log.Printf("Error loading %s file\n", env)
-		}
-	}
-
-	// verify env variables
-	if err := config.VerifyEnvironment(typing.Env{}); err != nil {
-		log.Fatalf("Error verifying environment variables: %s\n", err)
-	}
-
-	// append env variables to config.Env
-	config.AppendEnvironment(config.Env)
 
 	//connect to monogoDB and select database
 	if err := database.NewMongoDBClient(config.Env.MongoDBURI, config.Env.MongoDBName); err != nil {
@@ -93,6 +78,73 @@ func createServer() (s *http.Server) {
 }
 
 func main() {
+
+	// load .env file
+	env := config.MustGet("ENV_PATH", ".env") // might be wondering, get ENV_PATH when env is not loaded yet? the answer is that you can set env variables out of the .env file (e.g. in the terminal using export ENV_PATH=...)
+	log.Printf("Loading %s file\n", env)
+	if err := godotenv.Load(env); err != nil {
+		if err := godotenv.Load(); err != nil {
+			log.Printf("Error loading %s file\n", env)
+		}
+	}
+
+	// verify env variables
+	if err := config.VerifyEnvironment(typing.Env{}); err != nil {
+		log.Fatalf("Error verifying environment variables: %s\n", err)
+	}
+
+	// append env variables to config.Env
+	config.AppendEnvironment(config.Env)
+
+	scraper := ts.New()
+
+	err := scraper.Login("", "", "")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cookies := scraper.GetCookies()
+	// serialize to JSON
+	js, _ := json.Marshal(cookies)
+	// save to file
+	f, _ := os.Create("cookies.json")
+	f.Write(js)
+
+	// scraper.WithReplies(true)
+
+	// var cookies []*http.Cookie
+
+	// if err := json.Unmarshal([]byte(os.Getenv("TWITTER_COOKIES")), &cookies); err != nil {
+	// 	log.Printf(`[main.main] [json.Unmarshal([]byte(primer.ENV.TwitterCookies), &cookies)] %s`, err.Error())
+	// 	os.Exit(1)
+	// }
+
+	// load cookies
+	scraper.SetCookies(cookies)
+	// check login status
+	scraper.IsLoggedIn()
+
+	// get tweet with replies
+	tw := ""
+	counter := 0
+	for tweet := range scraper.SearchTweets(context.Background(), "@opensaucery @opensauceryf", 1800) {
+
+		if tweet.Error != nil {
+			log.Print(tweet.Error)
+			continue
+		}
+		if tweet.InReplyToStatusID == tw {
+			counter++
+			log.Printf("Tweet %d", counter)
+			log.Println("nil:", tweet.ID, tweet.Text, tweet.InReplyToStatusID)
+			continue
+		}
+		// if tweet.InReplyToStatus.ID == tw {
+		// log.Println(tw, tweet.InReplyToStatus.ID, tweet.Text)
+		// }
+	}
+
+	return
 
 	s := createServer()
 	// kill (no param) default send syscall.SIGTERM

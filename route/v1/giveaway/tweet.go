@@ -13,5 +13,4 @@ func RegisterTweetRoutes(r *mux.Router) {
 	// making them GET methods for now while there's no UI
 	router.Handle("/replies", middleware.AuthF(giveaway.Replies)).Methods("GET")
 	router.Handle("/report/{id}", middleware.ParamsF(giveaway.Report)).Methods("GET")
-	router.HandleFunc("/past", giveaway.Past).Methods("GET")
 }
